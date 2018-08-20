@@ -35,6 +35,13 @@ plugins:
     - serverless-consul-variables
 ```
 
+To reference a consul variable, you must prefix it with ${consul:}. For example:
+
+```yaml
+environment:
+  SOME_VARIABLE: ${consul:path/to/kv/variable}
+```
+
 ## Contributing
 
 Pull requests are always welcome. Please see the [contributing](https://github.com/zephrax/serverless-consul-variables/blob/master/CONTRIBUTING.md) guidelines.
