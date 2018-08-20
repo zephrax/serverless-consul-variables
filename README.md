@@ -21,7 +21,7 @@ npm install serverless-consul-variables --save-dev
 
 #or
 
-yarn install -D serverless-consul-variables
+yarn add -D serverless-consul-variables
 ```
 
 Then inside of your project's `serverless.yml` file add the following to the plugins section. You should change the consul host & port to match your build environment.

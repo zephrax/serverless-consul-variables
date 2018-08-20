@@ -1,6 +1,6 @@
 {
   "name": "serverless-consul-variables",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Read variables from a Consul Server",
   "main": "dist/index.js",
   "repository": "https://github.com/zephrax/serverless-consul-variables",
