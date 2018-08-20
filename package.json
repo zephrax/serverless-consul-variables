@@ -23,6 +23,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "jest",
+    "coveralls": "jest && coveralls < coverage/lcov.info",
     "precommit": "lint-staged",
     "build": "rollup -c rollup.config.js"
   },
@@ -36,6 +37,7 @@
     "babel-eslint": "^8.2.6",
     "babel-jest": "^23.4.2",
     "babel-preset-env": "^1.7.0",
+    "coveralls": "^3.0.2",
     "eslint": "^5.4.0",
     "eslint-plugin-import": "^2.14.0",
     "jest": "^23.5.0",

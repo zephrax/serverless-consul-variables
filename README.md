@@ -1,5 +1,8 @@
 # serverless-consul-variables
 [![Build Status](https://travis-ci.org/zephrax/serverless-consul-variables.svg?branch=master)](https://travis-ci.org/zephrax/serverless-consul-variables)
+[![Coverage Status](https://coveralls.io/repos/github/zephrax/serverless-consul-variables/badge.svg?branch=master)](https://coveralls.io/github/zephrax/serverless-consul-variables?branch=master)
+[![devDependency Status](https://david-dm.org/zephrax/serverless-consul-variables/dev-status.svg)](https://david-dm.org/zephrax/serverless-consul-variables#info=devDependencies)
+[![Dependency Status](https://david-dm.org/zephrax/serverless-consul-variables.svg)](https://david-dm.org/zephrax/serverless-consul-variables)
 
 This [Serverless](https://github.com/serverless/serverless) plugin allows you to populate environment variables from a Consul server. This is done at build time.
 
