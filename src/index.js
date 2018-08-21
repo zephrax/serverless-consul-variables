@@ -7,7 +7,7 @@ var consulClient;
 export default class ServerlessConsulVariables {
 
   constructor(serverless) {
-    const consulSettings = serverless.service.custom['serverless-consul-variables'] || {};
+    const consulSettings = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']) ? serverless.service.custom['serverless-consul-variables'] : {host: '127.0.0.1', port: 8500};
     consulClient = consul({...consulSettings, promisify: true});
 
     this.serverless = serverless;
