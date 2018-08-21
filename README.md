@@ -26,6 +26,7 @@ yarn add -D serverless-consul-variables
 
 Then inside of your project's `serverless.yml` file add the following to the plugins section. You should change the consul host & port to match your build environment.
 
+**FYI**: It defaults to this values with no need to put them in `serverless.yml`. If you use other values, please, put what you need here.
 ```yaml
 custom:
   serverless-consul-variables:
