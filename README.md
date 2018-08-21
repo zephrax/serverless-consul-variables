@@ -43,6 +43,10 @@ environment:
   SOME_VARIABLE: ${consul:path/to/kv/variable}
 ```
 
+## Contributors
+
+- [brahama](https://github.com/brahama)
+ 
 ## Contributing
 
 Pull requests are always welcome. Please see the [contributing](https://github.com/zephrax/serverless-consul-variables/blob/master/CONTRIBUTING.md) guidelines.
