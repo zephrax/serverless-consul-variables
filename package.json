@@ -1,6 +1,6 @@
 {
   "name": "serverless-consul-variables",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Read variables from a Consul Server",
   "main": "dist/index.js",
   "repository": "https://github.com/zephrax/serverless-consul-variables",
@@ -28,7 +28,6 @@
     "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
     "consul": "^0.34.0",
     "eslint-plugin-jest": "^21.21.0"
   },
