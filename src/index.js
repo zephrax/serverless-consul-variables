@@ -1,5 +1,4 @@
 import consul from 'consul';
-import Promise from 'bluebird';
 
 const CONSUL_PREFIX = 'consul';
 var consulClient;
@@ -28,7 +27,7 @@ export default class ServerlessConsulVariables {
 
   async _getValueFromConsul(variable) {
     if (this.resolvedValues[variable]) {
-      return Promise.resolve(this.resolvedValues[variable]);
+      return this.resolvedValues[variable];
     }
 
     const data = await consulClient.kv.get(variable.startsWith('/') ? variable.substr(1) : variable);
