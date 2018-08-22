@@ -1,6 +1,5 @@
 import ServerlessConsulVariables from '../index';
 import consul from 'consul';
-import Promise from 'bluebird';
 
 const CONSUL_PREFIX = 'consul';
 const OTHER_PREFIX = 'other';
@@ -38,10 +37,10 @@ test('Retrieve kv variable from consul', async () => {
   consul.mockImplementation(() => {
     return {
       kv: {
-        get: jest.fn(() => {
-          return Promise.resolve({
+        get: jest.fn(async () => {
+          return {
             Value: 'test_value'
-          });
+          };
         })
       }
     }
@@ -59,10 +58,10 @@ test('Retrieve cached kv variable', async () => {
   consul.mockImplementation(() => {
     return {
       kv: {
-        get: jest.fn(() => {
-          return Promise.resolve({
+        get: jest.fn(async () => {
+          return {
             Value: 'cached_value'
-          });
+          };
         })
       }
     }
@@ -83,10 +82,10 @@ test('Retrieve kv variable from consul using default consul settings', async () 
   consul.mockImplementation(() => {
     return {
       kv: {
-        get: jest.fn(() => {
-          return Promise.resolve({
+        get: jest.fn(async () => {
+          return {
             Value: 'test_value'
-          });
+          };
         })
       }
     }
@@ -101,10 +100,10 @@ test('Delegate variable logic to serverless', async () => {
   consul.mockImplementation(() => {
     return {
       kv: {
-        get: jest.fn(() => {
-          return Promise.resolve({
+        get: jest.fn(async () => {
+          return {
             Value: 'test_value'
-          });
+          };
         })
       }
     }
@@ -120,7 +119,7 @@ test('Fail to retrieve kv variable from consul', async () => {
   consul.mockImplementation(() => {
     return {
       kv: {
-        get: jest.fn(() => {
+        get: jest.fn(async () => {
           return;
         })
       }
