@@ -33,7 +33,7 @@ export default class ServerlessConsulVariables {
     this.hooks = {
       'consul:getValue': async () => {
         const result = await this._getValueFromConsul.call(this, options['get-key']);
-        console.log(result);
+        this.serverless.cli.log(result);
        }
         
     }
