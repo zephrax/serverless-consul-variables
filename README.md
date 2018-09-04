@@ -27,11 +27,17 @@ yarn add -D serverless-consul-variables
 Then inside of your project's `serverless.yml` file add the following to the plugins section. You should change the consul host & port to match your build environment.
 
 **FYI**: It defaults to this values with no need to put them in `serverless.yml`. If you use other values, please, put what you need here.
+
 ```yaml
 custom:
   serverless-consul-variables:
-    host: 127.0.0.1
-    port: 8500
+    consul_settings:
+      host: 127.0.0.1
+      port: 8500
+    service:
+      enable_registration: true
+      enpdoint_filters: 'api'
+      consul_endpoint_key_path: 'dev_test/serverless/endpoints/auth'
 plugins:
     - serverless-consul-variables
 ```
@@ -42,6 +48,45 @@ To reference a consul variable, you must prefix it with ${consul:}. For example:
 environment:
   SOME_VARIABLE: ${consul:path/to/kv/variable}
 ```
+
+=======
+### Service Registration in Consul KV
+
+The parent for this options is ```service``` under the custom ```serverless-consul-variables``` structure.
+If enabled in ```enable_registration: true``` the service will be added to a KV of your choice. Defaults to ```false```
+The full path should be in ```consul_endpoint_key_path```
+
+#### Endpoint filters
+
+For now it only support one filter. The basic usage is to select the function you want to register in case there are more
+than one.
+
+Usage:
+
+```enpdoint_filters: 'api'``` will only return the functions with api.
+
+Let's assume this case:
+
+```yaml
+functions:
+  Controller1:
+    handler: handler.default
+    events:
+      - http:
+          path: api
+          method: post
+
+  Controller2:
+    handler: tasks.apigw
+    events:
+      - http:
+          path: task
+          method: post
+```
+
+Now setting the filter to ```api``` as above, will only register the function with api in the path.
+
+**TODO**: Support for multiple and more intelligent filters.
 
 ## Contributors
 
