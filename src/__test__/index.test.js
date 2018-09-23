@@ -20,8 +20,15 @@ const serverless = {
   service: {
     custom: {
       'serverless-consul-variables': {
-        host: '127.0.0.1',
-        port: 8500
+        consul_settings: {
+          host: 'localhost',
+          port: 8500
+        },
+        service: {
+          enable_registration: 'true',
+          enpdoint_filters: 'api',
+          consul_endpoint_key_path: 'dev_test/serverless/endpoints/auth'
+        }
       }
     },
     provider: {
