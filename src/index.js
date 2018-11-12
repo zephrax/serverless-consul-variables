@@ -1,19 +1,24 @@
 import consul from 'consul';
+import {createDebug} from './logger/index';
+import Promise from 'bluebird';
+import _ from 'lodash';
 
-const _ = require('lodash');
+const debug = createDebug(__filename);
 const CONSUL_PREFIX = 'consul';
-var consulClient;
 
 export default class ServerlessConsulVariables {
 
   constructor(serverless, options) {
-    const consulSettings = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['consul_settings']) ? serverless.service.custom['serverless-consul-variables']['consul_settings'] : {};
-    consulClient = consul({...consulSettings, promisify: true});
+    this._consulSettings = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['consul_settings']) ? serverless.service.custom['serverless-consul-variables']['consul_settings'] : {};
+    this._consulClient = consul({...this._consulSettings, promisify: true});
+    this._enableServiceRegistration = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enable_registration']) ?  serverless.service.custom['serverless-consul-variables']['service']['enable_registration'] : false;
+    this._serviceEndpointFilter = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters']) ? serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters'] : 'api';
+    this._consulEndpointKeyPath = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path']) ? serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path'] : '/';
 
-    const enableServiceRegistration = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enable_registration']) ?  serverless.service.custom['serverless-consul-variables']['service']['enable_registration'] : false;
-    const service_endpoint_filter = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters']) ? serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters'] : 'api';
-    const consul_endpoint_key_path = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path']) ? serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path'] : '/';
-    
+    if (this._consulEndpointKeyPath.endsWith('/')) {
+      this._consulEndpointKeyPath = this._consulEndpointKeyPath
+          .substring(0, this._consulEndpointKeyPath.length - 1);
+    }
 
     this.serverless = serverless;
     this.options = options;
@@ -44,21 +49,14 @@ export default class ServerlessConsulVariables {
         this.serverless.cli.log(result);
        },
        'after:deploy:deploy': async () => {
-          if(enableServiceRegistration){
-            this._generateEndpoint(service_endpoint_filter, consul_endpoint_key_path);
+          if (this._enableServiceRegistration) {
+            this._generateEndpoints();
           }
-          
-       },
-       'info:info': async () => {
-          if(enableServiceRegistration){
-            this._generateEndpoint(service_endpoint_filter, consul_endpoint_key_path);
-          }
-       } 
-        
+       }
     }
 
     const delegate = serverless.variables
-    .getValueFromSource.bind(serverless.variables);
+      .getValueFromSource.bind(serverless.variables);
 
     serverless.variables.getValueFromSource = (variableString) => {
       if (variableString.startsWith(`${CONSUL_PREFIX}:`)) {
@@ -76,65 +74,61 @@ export default class ServerlessConsulVariables {
       return this.resolvedValues[variable];
     }
 
-    const data = await consulClient.kv.get(variable.startsWith('/') ? variable.substr(1) : variable);
+    let data = await this._consulClient.kv.get(variable.startsWith('/') ? variable.substr(1) : variable);
     if (!data) {
-      const errorMessage = `Error getting variable from Consul: ${variable}. Variable not found.`;
+      let errorMessage = `Error getting variable from Consul: ${variable}. Variable not found.`;
       throw new this.serverless.classes.Error(errorMessage);
     }
     this.resolvedValues[variable] = data.Value;
     return data.Value;
   }
 
+  async _generateEndpoints() {
+    let infoPlugin = this.serverless.pluginManager.plugins.find((plugin) => plugin.constructor.name == 'AwsInfo');
+    let info = infoPlugin ? infoPlugin.gatheredData.info : null;
+    let filterRegExp = new RegExp(this._serviceEndpointFilter);
+    let endpoint;
 
+    if (info.endpoint) {
+      let events = [];
 
+      _.forEach(this.serverless.service.functions, (functionObject) => {
+        let httpEvents = functionObject.events.filter(event => event.http);
+        events = events.concat(httpEvents);
+      });
 
-  // Generate AWS Endpoint from API Gateway plus the task name.
-  async _generateEndpoint(service_endpoint_filter, consul_endpoint_key_path){
-    var info;
-    let plugins = this.serverless.pluginManager.plugins;
-    plugins.forEach( plugin => {
-      if(plugin.constructor.name == 'AwsInfo'){
-        info = plugin.gatheredData.info;
-      }
-    });
+      return Promise.map(events, (event) => {
+        let path;
+        let method = '';
 
-    var endpoint;
+        if (typeof event.http === 'object') {
+          path = event.http.path;
+          method = event.http.method;
+        } else {
+          path = event.http.split(' ')[1];
+        }
 
-    // Only if we have an endpoint makes sense.
-    if(info.endpoint) {
-      _.forEach(this.serverless.service.functions, functionObject => {
-        functionObject.events.forEach( event => {
-            if(event.http) {
-              let path;
-              if (typeof event.http === 'object') {
-                path = event.http.path;
-              } else {
-                path = event.http.split(' ')[1];
-              }
-              if(path == service_endpoint_filter) {
-                endpoint = `${info.endpoint}/${path}`;
-                this._registerEndpoint(endpoint, consul_endpoint_key_path);
-              }
-
-            }
-        });
+        if (filterRegExp.test(path)) {
+          endpoint = `${info.endpoint}/${path}`;
+          let consulPath = `${this._consulEndpointKeyPath}/${path}_${method}`;
+          return this._registerEndpoint(consulPath, endpoint);
+        }
       });
     }
+  }
 
-    
-  };
+  async _registerEndpoint(consulPath, endpoint) {
+    debug(`Setting ${consulPath} to '${endpoint}'...`);
+    let result = await this._consulClient.kv.set(consulPath, endpoint);
 
-  // Lets register the endpoint api into consul KV
-  async _registerEndpoint(endpoint, consul_endpoint_key_path){
-    
-    const result = await consulClient.kv.set((consul_endpoint_key_path.startsWith('/') ? consul_endpoint_key_path.substr(1) : consul_endpoint_key_path), endpoint);
-    if(!result){
-      const errorMessage = 'Error trying to set ' + consul_endpoint_key_path + ', ' + err;
+    if (!result) {
+      let errorMessage = `Error trying to set ${consulPath} to '${endpoint}'`;
+      debug(errorMessage);
       throw new this.serverless.classes.Error(errorMessage);
     }
-    console.log(`Endpoint ${endpoint} registered succesfully in Consul ${consul_endpoint_key_path}`);
+
+    debug(`Endpoint ${endpoint} registered succesfully in Consul ${consulPath}`);
     return result;
   }
-  
 }
 

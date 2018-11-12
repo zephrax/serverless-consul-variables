@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "consul": "^0.34.0",
+    "debug": "^4.1.0",
     "eslint-plugin-jest": "^21.21.0",
     "lodash": "^4.17.11"
   },
