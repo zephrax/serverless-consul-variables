@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "consul": "^0.34.0",
-    "eslint-plugin-jest": "^21.21.0"
+    "eslint-plugin-jest": "^21.21.0",
+    "lodash": "^4.17.11"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
