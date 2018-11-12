@@ -26,8 +26,8 @@ const serverless = {
         },
         service: {
           enable_registration: 'true',
-          enpdoint_filters: 'api',
-          consul_endpoint_key_path: 'dev_test/serverless/endpoints/auth'
+          enpdoint_filters: '^api(.*)',
+          consul_endpoint_key_path: 'dev_test/serverless/endpoints'
         }
       }
     },

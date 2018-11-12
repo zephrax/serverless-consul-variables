@@ -9,11 +9,11 @@ const CONSUL_PREFIX = 'consul';
 export default class ServerlessConsulVariables {
 
   constructor(serverless, options) {
-    this._consulSettings = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['consul_settings']) ? serverless.service.custom['serverless-consul-variables']['consul_settings'] : {};
+    this._consulSettings = (serverless.service.custom && serverless.service.custom['serverless-consul-variables'] && serverless.service.custom['serverless-consul-variables']['consul_settings']) ? serverless.service.custom['serverless-consul-variables']['consul_settings'] : {};
     this._consulClient = consul({...this._consulSettings, promisify: true});
-    this._enableServiceRegistration = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enable_registration']) ?  serverless.service.custom['serverless-consul-variables']['service']['enable_registration'] : false;
-    this._serviceEndpointFilter = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters']) ? serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters'] : 'api';
-    this._consulEndpointKeyPath = (serverless.service.custom && serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path']) ? serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path'] : '/';
+    this._enableServiceRegistration = (serverless.service.custom && serverless.service.custom['serverless-consul-variables'] && serverless.service.custom['serverless-consul-variables']['service']['enable_registration']) ?  serverless.service.custom['serverless-consul-variables']['service']['enable_registration'] : false;
+    this._serviceEndpointFilter = (serverless.service.custom && serverless.service.custom['serverless-consul-variables'] && serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters']) ? serverless.service.custom['serverless-consul-variables']['service']['enpdoint_filters'] : 'api';
+    this._consulEndpointKeyPath = (serverless.service.custom && serverless.service.custom['serverless-consul-variables'] && serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path']) ? serverless.service.custom['serverless-consul-variables']['service']['consul_endpoint_key_path'] : '/';
 
     if (this._consulEndpointKeyPath.endsWith('/')) {
       this._consulEndpointKeyPath = this._consulEndpointKeyPath
