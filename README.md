@@ -63,7 +63,7 @@ than one.
 
 Usage:
 
-```enpdoint_filters: 'api'``` will only return the functions with api.
+```enpdoint_filters: '^api(.*)'``` will only return the functions starting with api.
 
 Let's assume this case:
 
